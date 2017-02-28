@@ -1,0 +1,27 @@
+Problem with Course API
+
+/v1/courses
+can't be queried to get a unique course.
+For example,
+subject-area-code: MATH
+catalog-number: H1B
+
+returns more than one course, e.g. H1BS, H1B.
+
+
+cs-course-id
+H1BS:	114723
+H1B:	114722
+
+
+/v1/courses/{id}
+allows for querying with some unique id
+but for some reason some courses can't be located by cs-course-id
+For example, H1B can't be found using its cs-course-id: 114722
+but can be found using
+cms-id:	07030a88-25cb-4e90-b5fe-708756e1d28a
+or
+cms-version-independent-id:	e04321c6-3989-41ee-bb3e-4147f6ee7d30
+
+
+solution? : probably have to use /v1/courses and match the catalog-number or cs-course-id again.

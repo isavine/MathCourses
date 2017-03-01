@@ -4,6 +4,7 @@ import urllib
 import get_schedule
 import old_get_catalog
 
+
 def aggregate(courses):
     keys = [c['Course']['Sort Key'] for c in courses]
     dc = dict(zip(keys, courses))
@@ -162,22 +163,42 @@ def output_course(sched_params, course):
     return o
 
 if __name__ == '__main__':
-    from optparse import OptionParser
+    #from optparse import OptionParser
 
-    usage = 'usage: %prog options'
-    parser = OptionParser(usage)
-    parser.add_option('-d', '--dept', dest='dept', default='MATH',
-                      help='department abbreviation, e.g. MATH')
-    parser.add_option('-t', '--term', dest='term', default='FL',
+    #usage = 'usage: %prog options'
+    #parser = OptionParser(usage)
+    #parser.add_option('-d', '--dept', dest='dept', default='MATH',
+    #                  help='department abbreviation, e.g. MATH')
+    #parser.add_option('-t', '--term', dest='term', default='FL',
+    #                  help='term/semester code (FL or SP or SU)')
+    #parser.add_option('-f', '--file', dest='file', default='courses.csv',
+    #                  help='name of output file (in csv format)')
+    ##parser.add_option('-s', '--searchresults', dest='searchresults',
+    ##                  help='name of search results file (in html format)')
+    #(options, args) = parser.parse_args()
+    
+    import os
+    import configargparse
+    
+    configpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config/config.ini')
+    parser = configargparse.ArgParser(default_config_files=[configpath])
+    parser.add_argument('-d', '--dept', default='MATH',
+                     help='department abbreviation, e.g. MATH')
+    parser.add_argument('-t', '--term', default='FL',
                       help='term/semester code (FL or SP or SU)')
-    parser.add_option('-f', '--file', dest='file', default='courses.csv',
+    parser.add_argument('-f', '--file', default='courses.csv',
                       help='name of output file (in csv format)')
-    #parser.add_option('-s', '--searchresults', dest='searchresults',
-    #                  help='name of search results file (in html format)')
-    (options, args) = parser.parse_args()
+    parser.add_argument('--class_app_id', help='Class API ID')
+    parser.add_argument('--class_app_key', help='Class API Key')
+    parser.add_argument('--course_app_id', help='Course API ID')
+    parser.add_argument('--course_app_key', help='Course API Key')
+    
+    options = parser.parse_args()
+    
     # API ID and Key
-    class_app_id = 'app_id'
-    class_app_key = 'app_key'
+    class_app_id = options.class_app_id
+    class_app_key = options.class_app_key
+    
     # minimum set of search parameters
     sched_params = {'p_dept': options.dept, 'p_term': options.term}
     # base URL for seaching course catalog

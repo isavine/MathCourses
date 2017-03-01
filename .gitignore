@@ -8,3 +8,5 @@ schedule.json
 sections.json
 
 courses.csv
+
+*.ini

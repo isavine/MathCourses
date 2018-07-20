@@ -1,137 +1,144 @@
-#import urllib
-#import pipes
-import re
+import requests
+import pprint
 import json
-import get_class
-from datetime import datetime
+import re
+import datetime
 
-# keys for parsing the schedule page
-keys = ['Course', 'Course Title', 'Location', 'Instructor', 'Course Control Number',
-        'Units/Credit', 'Final Exam Group', 'Session Dates', 'Restrictions', 'Summer Fees',
-        'Note', r'Enrollment on \d\d/\d\d/\d\d']
-#keys = ['Course', 'Course Title', 'Location', 'Instructor', 'Course Control Number',
-#        'Session Dates']
-        
-def get_all_courses(classes, app_id, app_key):
-    courses = get_courses(classes, app_id, app_key)            
-    for c in courses:
-        c = add_sort_key(c)
-        #print c['Course']
-    comment = str(len(courses)) + ' courses matched the schedule for Spring 2017'
-    return {'Comment': comment, 'Courses': courses}
+pp = pprint.PrettyPrinter(indent=2)
 
-#def course_info(nCourse, block_num, split_courses, data): #
+def get_sections(dept, term_id, page_number, page_size, exclude):
+    '''Get classes/sections from class API (one page at a time)'''
+    base_url = 'https://apis.berkeley.edu/sis/v1/classes/sections'
+    url = '{}?term-id={}&subject-area-code={}&print-in-schedule=true&page-number={}&page-size={}'.format(base_url, term_id, dept, page_number, page_size)
+    # API ID and Key
+    with open('config/api_keys.json', 'r') as f:
+        api_keys = json.load(f)
+    app_id = api_keys['class_app_id']
+    app_key = api_keys['class_app_key']
+    #pp.pprint(url)
+    headers = {'Accept': 'application/json', 'app_id': app_id, 'app_key': app_key}
+    #pp.pprint(headers)
 
-def add_sort_key(course):
+    api_response = requests.get(url, headers=headers)
+    #pp.pprint(api_response.json())
+    if api_response.json()['apiResponse']['httpStatus']['code'] != '200':
+        return []
+    sections = api_response.json()['apiResponse']['response']['classSections']
+    return sections
+
+def get_all_sections(dept, term_id, number_of_pages, page_size, exclude):
+    '''Get all sections in output format compatible with Math website'''
+    sections = []
+    for i in range(number_of_pages):
+        page_number = i + 1
+        sections = sections + get_sections(dept, term_id, page_number, page_size, exclude)
+    exclude_list = exclude.split(',')
+    classes = []
+    course_headers = ('Department', 'Number', 'Title')
+    section_headers = ('Class', 'Number', 'Type', 'Days/Times', 'Location', 'Instructor', 'Status', 'Sort Key')
+    for s in sections:
+        course_info = dict(zip(course_headers, get_course_info(s)))
+        section_info = dict(zip(section_headers, get_section_info(s)))
+        if section_info['Type'] in exclude_list:
+            # drop sections from exclude list
+            continue
+        #print s['class']['course']['displayName'], s['component']['code'], s['number'], s['id']
+        #print course_info['Department'], course_info['Number'], section_info['Type'], section_info['Number'], section_info['Class']
+        classes += [{'Course': course_info, 'Section': section_info}]
+    return classes
+
+def get_course_info(section):
+    '''Get course information from raw section format'''
+    dept = section['class']['course']['subjectArea']['code']
+    course_num = section['class']['course']['catalogNumber']['formatted']
+    course_title = section['class']['course']['title']
+    return (dept, course_num, course_title)
+
+def get_section_info(section):
+    '''Get section infomation from raw section format'''
+    class_num = section['id']
+    section_num = section['number']
+    section_type = section['component']['code']
+    days = ''
+    if 'meetings' in section.keys() and \
+       'meetsDays' in section['meetings'][0].keys():
+            days = section['meetings'][0]['meetsDays']
+    times = ''
+    if 'meetings' in section.keys() and \
+       'startTime' in section['meetings'][0].keys() and \
+       'endTime' in section['meetings'][0].keys():
+            # convert 24 hour to 12 hour time
+            t = datetime.datetime.strptime(section['meetings'][0]['startTime'], '%H:%M:%S')
+            start_time = t.strftime('%I:%M%p')
+            t = datetime.datetime.strptime(section['meetings'][0]['endTime'], '%H:%M:%S')
+            end_time = t.strftime('%I:%M%p')
+            times = '%5s - %5s' % (start_time, end_time)
+    days_times = ('%s %s' % (days, times)).strip()
+    #if days_times:
+        #print days_times
+    location = ''
+    if 'meetings' in section.keys() and \
+       'location' in section['meetings'][0].keys() and \
+       'description' in section['meetings'][0]['location'].keys():
+            location = section['meetings'][0]['location']['description']
+            #print location
+    instructor = ''
+    if 'meetings' in section.keys() and \
+       'assignedInstructors' in section['meetings'][0].keys() and \
+       'instructor' in section['meetings'][0]['assignedInstructors'][0].keys() and \
+       'names' in section['meetings'][0]['assignedInstructors'][0]['instructor'].keys() and \
+       'formattedName' in section['meetings'][0]['assignedInstructors'][0]['instructor']['names'][0].keys():
+            instructor = section['meetings'][0]['assignedInstructors'][0]['instructor']['names'][0]['formattedName']
+            #print instructor
+    status = section['enrollmentStatus']['status']['description']
+    course_num = section['class']['course']['catalogNumber']['formatted']
+    sort_key = get_sortkey(course_num, section_num, section_type)
+    return (class_num, section_num, section_type, days_times, location, instructor, status, sort_key)
+
+def get_sortkey(course_num, section_num, section_type):
+    '''Produce sort key from course number, section number, and section type'''
     r = r'(^\D?)(\d+)(\D*)$'
     i = 0
-    n = course['Course']['Number']
-    m = re.match(r, n)
+    m = re.match(r, course_num)
     m1 = m.group(1).rjust(1, ' ')
     m2 = m.group(2).rjust(3, '0')
     m3 = m.group(3).ljust(2, ' ')
-    s = course['Course']['Section']
-    if course['Course']['Type'] == 'P':
-        if not '-' in s:
-            s = s.ljust(5, '0')
-        else:
-            s = s.ljust(5, ' ')
-    if course['Course']['Type'] == 'S':
-        s = s.rjust(5, '0')
-    course['Course']['Sort Key'] = m2 + m3 + m1 + s
-    return course
+    n = section_num
+    if section_type == 'DIS' or section_type == 'WBD':
+        n = n.rjust(5, '0')
+    else:
+        n = n.ljust(5, '0')
+    return m2 + m3 + m1 + n
 
-def get_courses(classes, app_id, app_key):
-    courses = []
-    #k = 0
-    #keep track of the block of data we are working with starting from 0
-    #data[0] - block of 3; data[1] - block of 4
-    for x in classes:
-        sections = get_class.get_sections(x['class']['course']['identifiers'][0]['id'], app_id, app_key) 
-        #I have to call classes/sections for each course because for some reason I couldn't query all classes and sections from /sections at once.
-        for y in sections:
-            course = {}
-        
-            d = {}
-            #(d['Number'], d['Section'], d['Kind']) = (split_courses[3*nCourse+1],data[0][3*(nCourse+nSec)+1],data[0][3*(nCourse+nSec)+2])
-            d['Number'] = y['class']['course']['catalogNumber']['formatted']
-            d['Section'] = y['class']['number']
-            d['Kind'] = y['component']['code']
-            #d['Type'] = x.['instructionMode']['code']   --- instructionMode can only be found for main classes not for discussion sections
-            #Assuming 'DIS' is of type 'S'; else 'P'
-            if d['Kind'] == 'DIS':
-                d['Type'] = 'S'
-            else:
-                d['Type'] = 'P'
-            #d['Department'] = x.['subjectArea']['description'] <-- return 'Mathematics'
-            d['Department'] = 'MATHEMATICS'
-        
-            course['Course'] = d
-            #skipping 'IND' courses
-            if course['Course']['Kind'] == 'IND' or course['Course']['Kind'] == 'COL': #'SEM' shouldn't be omitted.
-                #k += 1
-                continue
-            course['Course Title'] = y['class']['course']['title']
-            if 'meetings' in y:
-                #course['Days/Time'] = y['meetings'][0]['meetsDays'] + ' ' + y['meetings'][0]['startTime'] + ' - ' + y['meetings'][0]['endTime']
-                #Time in 24:00:00
-                start = datetime.strptime(y['meetings'][0]['startTime'], '%H:%M:%S')
-                end = datetime.strptime(y['meetings'][0]['endTime'], '%H:%M:%S')
-                course['Days/Time'] = y['meetings'][0]['meetsDays'] + ' ' + start.strftime("%I:%M%p") + ' - ' + end.strftime("%I:%M%p")
-                course['Location'] = y['meetings'][0]['location']['description']
-                if 'assignedInstructors' in y['meetings'][0]:
-                    if 'names' in y['meetings'][0]['assignedInstructors'][0]['instructor']:
-                        course['Instructor'] = y['meetings'][0]['assignedInstructors'][0]['instructor']['names'][0]['givenName'] + ' ' + y['meetings'][0]['assignedInstructors'][0]['instructor']['names'][0]['familyName']
-                    else:
-                        course['Instructor'] = ''
-                else:
-                    course['Instructor'] = ''
-            else:
-                course['Days/Time'] = 'TBA'
-                course['Location'] = 'TBA'
-                course['Instructor'] = ''
-            course['Course Control Number'] = y['id'] #aka class section id
-            course['Units/Credit'] = y['class']['allowedUnits']['forAcademicProgress'] #option minimum/maximum/forAcademicProgress/forFinancialAid
-            course['Final Exam Group'] = "" #probably not available via api. See http://registrar.berkeley.edu/sis-SC-message
-            #Final Exam Info is supposed to be in classes/sections  ['exam'] but it's currently not available?
-            #course['Session Dates'] = ""
-            course['Restrictions'] = ""
-            #course['Summer Fees'] = ""
-            course['Note'] = ""
-            course['Enrollment'] = y['enrollmentStatus']['status']['description'] 
-            #enrollmentStatus: enrolledCount, waitlistedCount, minEnroll, maxEnroll, maxWaitlist
-            courses = courses + [course]
-            #k += 1
-    return courses
-    
+
 if __name__ == '__main__':
+    '''Get department class schedule for specified term'''
     from optparse import OptionParser
 
     usage = 'usage: %prog options'
     parser = OptionParser(usage)
     parser.add_option('-d', '--dept', dest='dept', default='MATH',
                       help='department abbreviation, e.g. MATH')
-    parser.add_option('-t', '--term', dest='term', default='FL',
-                      help='term/semester code (FL or SP or SU)')
-    parser.add_option('-f', '--file', dest='file', default='schedule.json',
+    parser.add_option('-t', '--term', dest='term_id', default='2188',
+                      help='term id, e.g. 2188')
+    parser.add_option('-p', '--number-of-pages', dest='number_of_pages', default=2,
+                      help='number of pages, e.g. 1')
+    parser.add_option('-s', '--page-size', dest='page_size', default=400,
+                      help='page number, e.g. 100 (maximum 400)')
+    parser.add_option('-e', '--exclude', dest='exclude', default='IND,COL',
+                      help='comma separated section types to be excluded from search results, default "IND,COL"')
+    parser.add_option('-o', '--output', dest='output', default='sections.json',
                       help='name of output file (in json format)')
-    #parser.add_option('-s', '--searchresults', dest='searchresults',
-    #                  help='name of search results file (in html format)')
     (options, args) = parser.parse_args()
-    # API ID and Key
-    class_app_id = 'app_id'
-    class_app_key = 'app_key'
-    #baseurl = 'https://apis.berkeley.edu/sis/v1/classes?term-id=2172&subject-area-code='
+    # get arguments
     dept = options.dept
-    
-    import get_class
-    classes = get_class.get_class(dept, class_app_id, class_app_key)
-    #print classes[0]
-    #result = get_courses(classes)
-    
-    # Output file: searchresults.html -> searchresults.json
-    #f = open(options.searchresults.split('.')[0]+'.json', 'wb')
-    f = open(options.file, 'wb')
-    schedule = get_all_courses(classes, class_app_id, class_app_key)
-    json.dump(schedule, f, sort_keys=True, indent=4)
-    f.close()
+    term_id = options.term_id
+    number_of_pages = options.number_of_pages
+    page_size = options.page_size
+    exclude = options.exclude
+    output = options.output
+    # get matching sections
+    sections = get_all_sections(dept, term_id, number_of_pages, page_size, exclude)
+    print '{} class(es) found (see output in {})'.format(len(sections), output)
+    with open(output, 'w') as f
+        json.dump(sections, f, sort_keys=True, indent=2)

@@ -1,12 +1,5 @@
-
-class.json
-
-courses_24h_old.csv
-
-schedule.json
-
-sections.json
-
-courses.csv
-
-*.ini
+*.json
+*.csv
+*.pyc
+[0-9]*
+config

@@ -4,26 +4,25 @@ import json
 import re
 import datetime
 
-pp = pprint.PrettyPrinter(indent=2)
-
+pp = pprint.PrettyPrinter(indent = 2)
+ 
 def get_sections(dept, term_id, page_number, page_size, exclude):
     '''Get classes/sections from class API (one page at a time)'''
     base_url = 'https://apis.berkeley.edu/sis/v1/classes/sections'
     url = '{}?term-id={}&subject-area-code={}&print-in-schedule=true&page-number={}&page-size={}'.format(base_url, term_id, dept, page_number, page_size)
+    #pp.pprint(url)
     # API ID and Key
     with open('config/api_keys.json', 'r') as f:
         api_keys = json.load(f)
-    app_id = api_keys['class_app_id']
-    app_key = api_keys['class_app_key']
-    #pp.pprint(url)
+        app_id = api_keys['class_app_id']
+        app_key = api_keys['class_app_key']
     headers = {'Accept': 'application/json', 'app_id': app_id, 'app_key': app_key}
     #pp.pprint(headers)
-
-    api_response = requests.get(url, headers=headers)
-    #pp.pprint(api_response.json())
-    if api_response.json()['apiResponse']['httpStatus']['code'] != '200':
-        return []
-    sections = api_response.json()['apiResponse']['response']['classSections']
+    response = requests.get(url, headers = headers)
+    #pp.pprint(response.json())
+    if response.status_code != requests.codes.ok:
+        return
+    sections = response.json()['apiResponse']['response']['classSections']
     return sections
 
 def get_all_sections(dept, term_id, number_of_pages, page_size, exclude):
@@ -117,18 +116,18 @@ if __name__ == '__main__':
 
     usage = 'usage: %prog options'
     parser = OptionParser(usage)
-    parser.add_option('-d', '--dept', dest='dept', default='MATH',
-                      help='department abbreviation, e.g. MATH')
-    parser.add_option('-t', '--term', dest='term_id', default='2188',
-                      help='term id, e.g. 2188')
-    parser.add_option('-p', '--number-of-pages', dest='number_of_pages', default=2,
-                      help='number of pages, e.g. 1')
-    parser.add_option('-s', '--page-size', dest='page_size', default=400,
-                      help='page number, e.g. 100 (maximum 400)')
-    parser.add_option('-e', '--exclude', dest='exclude', default='IND,COL',
-                      help='comma separated section types to be excluded from search results, default "IND,COL"')
-    parser.add_option('-o', '--output', dest='output', default='sections.json',
-                      help='name of output file (in json format)')
+    parser.add_option('-d', '--dept', dest = 'dept', default = 'MATH',
+                      help = 'department abbreviation, e.g. MATH')
+    parser.add_option('-t', '--term', dest = 'term_id', default = '2188',
+                      help = 'term id, e.g. 2188')
+    parser.add_option('-p', '--number-of-pages', type = 'int', dest = 'number_of_pages', default = 2,
+                      help = 'number of pages, e.g. 1')
+    parser.add_option('-s', '--page-size', type = 'int', dest = 'page_size', default = 400,
+                      help = 'page number, e.g. 100 (maximum 400)')
+    parser.add_option('-e', '--exclude', dest = 'exclude', default = 'IND,COL',
+                      help = 'comma separated section types to be excluded from search results, default "IND,COL"')
+    parser.add_option('-o', '--output', dest = 'output', default = 'sections.json',
+                      help = 'name of output file (in json format)')
     (options, args) = parser.parse_args()
     # get arguments
     dept = options.dept
@@ -139,6 +138,9 @@ if __name__ == '__main__':
     output = options.output
     # get matching sections
     sections = get_all_sections(dept, term_id, number_of_pages, page_size, exclude)
-    print '{} class(es) found (see output in {})'.format(len(sections), output)
-    with open(output, 'w') as f
-        json.dump(sections, f, sort_keys=True, indent=2)
+    if sections and len(sections) > 0:
+        print '{} class(es) found (see output in {})'.format(len(sections), output)
+        with open(output, 'w') as f:
+            json.dump(sections, f, sort_keys = True, indent = 2)
+    else:
+        print 'no classes found (no output)'

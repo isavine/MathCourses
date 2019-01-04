@@ -21,7 +21,7 @@ def get_sections(dept, term_id, page_number, page_size, exclude):
     response = requests.get(url, headers = headers)
     #pp.pprint(response.json())
     if response.status_code != requests.codes.ok:
-        return
+        return []
     sections = response.json()['apiResponse']['response']['classSections']
     return sections
 

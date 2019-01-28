@@ -1,6 +1,7 @@
-*.json
-*.csv
-*.pyc
-*.swp
 *~
 [0-9]*
+*.csv
+*.json
+*.pyc
+*.sh
+*.swp

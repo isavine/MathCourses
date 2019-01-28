@@ -90,14 +90,13 @@ def get_section_info(section):
        'assignedInstructors' in section['meetings'][0].keys():
             names = []
             for e in section['meetings'][0]['assignedInstructors']:
-                if 'instructor' in e.keys() and \
+                if e['printInScheduleOfClasses'] and \
+                   'instructor' in e.keys() and \
                    'names' in e['instructor'].keys() and \
                    'formattedName' in e['instructor']['names'][0].keys():
                         name = e['instructor']['names'][0]['formattedName']
-                else:
-                        name = ''
-                #print name
-                names += [name]
+                        #print name
+                        names += [name]
             instructor = '\n'.join(trim_spaces(names))
     status = section['enrollmentStatus']['status']['description']
     course_num = section['class']['course']['catalogNumber']['formatted']

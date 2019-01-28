@@ -5,6 +5,10 @@ import re
 import datetime
 
 pp = pprint.PrettyPrinter(indent = 2)
+
+def trim_spaces(l):
+        '''Trim white spaces in a list of text elements'''
+        return [u' '.join(e.split()).encode('utf-8') for e in l]
  
 def get_sections(dept, term_id, page_number, page_size, exclude):
     '''Get classes/sections from class API (one page at a time)'''
@@ -83,12 +87,18 @@ def get_section_info(section):
             #print location
     instructor = ''
     if 'meetings' in section.keys() and \
-       'assignedInstructors' in section['meetings'][0].keys() and \
-       'instructor' in section['meetings'][0]['assignedInstructors'][0].keys() and \
-       'names' in section['meetings'][0]['assignedInstructors'][0]['instructor'].keys() and \
-       'formattedName' in section['meetings'][0]['assignedInstructors'][0]['instructor']['names'][0].keys():
-            instructor = section['meetings'][0]['assignedInstructors'][0]['instructor']['names'][0]['formattedName']
-            #print instructor
+       'assignedInstructors' in section['meetings'][0].keys():
+            names = []
+            for e in section['meetings'][0]['assignedInstructors']:
+                if 'instructor' in e.keys() and \
+                   'names' in e['instructor'].keys() and \
+                   'formattedName' in e['instructor']['names'][0].keys():
+                        name = e['instructor']['names'][0]['formattedName']
+                else:
+                        name = ''
+                #print name
+                names += [name]
+            instructor = '\n'.join(trim_spaces(names))
     status = section['enrollmentStatus']['status']['description']
     course_num = section['class']['course']['catalogNumber']['formatted']
     sort_key = get_sortkey(course_num, section_num, section_type)

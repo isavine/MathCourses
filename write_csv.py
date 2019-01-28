@@ -5,7 +5,9 @@ def output_section_row(section):
     output['Section'] = '%s %s' % (section['Number'], section['Type'])
     output['Days/Times'] = section['Days/Times']
     output['Location']  = section['Location']
-    output['Instructor'] = section['Instructor']
+    # separate intructors with ', ' instead of '\n'
+    output['Instructor'] = ', '.join(section['Instructor'].split('\n'))
+    #print output['Instructor']
     output['Class'] = section['Class']
     return output
 

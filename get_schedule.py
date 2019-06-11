@@ -24,10 +24,10 @@ def get_sections(dept, term_id, page_number, page_size, exclude):
     #pp.pprint(headers)
     response = requests.get(url, headers = headers)
     #pp.pprint(response.json())
-    if response.status_code != requests.codes.ok:
+    if response.status_code == requests.codes.ok and 'classSections' in response.json()['apiResponse']['response']:
+        return response.json()['apiResponse']['response']['classSections']
+    else:
         return []
-    sections = response.json()['apiResponse']['response']['classSections']
-    return sections
 
 def get_all_sections(dept, term_id, number_of_pages, page_size, exclude):
     '''Get all sections in output format compatible with Math website'''
@@ -129,9 +129,9 @@ if __name__ == '__main__':
                       help = 'department abbreviation, e.g. MATH')
     parser.add_option('-t', '--term', dest = 'term_id', default = '2188',
                       help = 'term id, e.g. 2188')
-    parser.add_option('-p', '--number-of-pages', type = 'int', dest = 'number_of_pages', default = 2,
+    parser.add_option('-p', '--number-of-pages', type = 'int', dest = 'number_of_pages', default = 5,
                       help = 'number of pages, e.g. 1')
-    parser.add_option('-s', '--page-size', type = 'int', dest = 'page_size', default = 400,
+    parser.add_option('-s', '--page-size', type = 'int', dest = 'page_size', default = 100,
                       help = 'page number, e.g. 100 (maximum 400)')
     parser.add_option('-e', '--exclude', dest = 'exclude', default = 'IND,COL',
                       help = 'comma separated section types to be excluded from search results, default "IND,COL"')

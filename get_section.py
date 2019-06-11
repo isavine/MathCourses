@@ -16,7 +16,7 @@ def get_sections(term_id, section_id):
         api_keys = json.load(f)
     app_id = api_keys['class_app_id']
     app_key = api_keys['class_app_key']
-    headers = {'Accept': 'application/json', 'app_id': app_id, 'app_key': app_key}
+    headers = {'accept': 'application/json', 'app_id': app_id, 'app_key': app_key}
     pp.pprint(headers)
 
     api_response = requests.get(url, headers = headers)
@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     usage = 'usage: %prog options'
     parser = OptionParser(usage)
-    parser.add_option('-t', '--term', dest = 'term_id', default = '2188',
-                      help = 'term ID, e.g. 2188')
+    parser.add_option('-t', '--term', dest = 'term_id', default = '2198',
+                      help = 'term ID, e.g. 2198')
     parser.add_option('-s', '--section-id', dest = 'section_id', default = None,
                       help = 'class section ID')
     parser.add_option('-o', '--output', dest = 'output', default = 'section.json',

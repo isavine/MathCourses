@@ -20,7 +20,7 @@ def get_sections(dept, term_id, page_number, page_size, exclude):
         api_keys = json.load(f)
         app_id = api_keys['class_app_id']
         app_key = api_keys['class_app_key']
-    headers = {'Accept': 'application/json', 'app_id': app_id, 'app_key': app_key}
+    headers = {'accept': 'application/json', 'app_id': app_id, 'app_key': app_key}
     #pp.pprint(headers)
     response = requests.get(url, headers = headers)
     #pp.pprint(response.json())

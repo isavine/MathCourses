@@ -98,7 +98,10 @@ def get_section_info(section):
                         #print name
                         names += [name]
             instructor = '\n'.join(trim_spaces(names))
-    status = section['enrollmentStatus']['status']['description']
+    if 'enrollmentStatus' in section and 'status' in section['enrollmentStatus'] and 'description' in section['enrollmentStatus']['status']:
+        status = section['enrollmentStatus']['status']['description']
+    else:
+        status = 'Unknown'
     course_num = section['class']['course']['catalogNumber']['formatted']
     sort_key = get_sortkey(course_num, section_num, section_type)
     return (class_num, section_num, section_type, days_times, location, instructor, status, sort_key)

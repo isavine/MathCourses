@@ -91,8 +91,8 @@ if __name__ == '__main__':
     parser = OptionParser(usage)
     parser.add_option('-d', '--dept', dest = 'dept', default = 'MATH',
                       help = 'department abbreviation, default MATH')
-    parser.add_option('-t', '--term', dest = 'term_id', default = '2188',
-                      help = 'term id, e.g. 2188')
+    parser.add_option('-t', '--term', dest = 'term_id', default = '2198',
+                      help = 'term id, e.g. 2198')
     parser.add_option('-p', '--number-of-pages', type = 'int', dest = 'number_of_pages', default = 5,
                       help = 'number of pages, e.g. 1')
     parser.add_option('-s', '--page-size', type = 'int', dest = 'page_size', default = 100,

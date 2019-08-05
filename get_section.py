@@ -10,14 +10,14 @@ def get_sections(term_id, section_id):
     '''Get section from class API by section ID'''
     base_url = 'https://apis.berkeley.edu/sis/v1/classes/sections'
     url = '{}/{}?term-id={}&include-secondary=true'.format(base_url, section_id, term_id)
-    pp.pprint(url)
+    #pp.pprint(url)
     # API ID and Key
     with open('config/api_keys.json', 'r') as f:
         api_keys = json.load(f)
     app_id = api_keys['class_app_id']
     app_key = api_keys['class_app_key']
     headers = {'accept': 'application/json', 'app_id': app_id, 'app_key': app_key}
-    pp.pprint(headers)
+    #pp.pprint(headers)
 
     api_response = requests.get(url, headers = headers)
     #pp.pprint(api_response.json())

@@ -50,7 +50,7 @@ def get_classes(dept, term_id, number_of_pages, page_size, exclude):
         classes = add_catalog_info(classes, catalog)
         return classes
     else:
-        return
+        return []
 
 if __name__ == '__main__':
     '''Get department class schedule for specified semester'''

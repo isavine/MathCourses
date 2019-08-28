@@ -47,8 +47,8 @@ if __name__ == '__main__':
     # get matching sections
     sections = get_sections(term_id, section_id)
     if sections:
-        print 'section {} found (see output in {})'.format(section_id, output)
+        print('section {} found (see output in {})'.format(section_id, output))
         with open(output, 'w') as f:
             json.dump(sections, f, sort_keys = True, indent = 2)
     else:
-        print 'section {} not found (no output)'.format(section_id)
+        print('section {} not found (no output)'.format(section_id))

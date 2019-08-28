@@ -45,8 +45,8 @@ def get_all_sections(dept, term_id, number_of_pages, page_size, exclude):
         if section_info['Type'] in exclude_list:
             # drop sections from exclude list
             continue
-        #print s['class']['course']['displayName'], s['component']['code'], s['number'], s['id']
-        #print course_info['Department'], course_info['Number'], section_info['Type'], section_info['Number'], section_info['Class']
+        #print(s['class']['course']['displayName'], s['component']['code'], s['number'], s['id'])
+        #print(course_info['Department'], course_info['Number'], section_info['Type'], section_info['Number'], section_info['Class'])
         classes += [{'Course': course_info, 'Section': section_info}]
     return classes
 
@@ -75,16 +75,16 @@ def get_section_info(section):
             start_time = t.strftime('%I:%M%p')
             t = datetime.datetime.strptime(section['meetings'][0]['endTime'], '%H:%M:%S')
             end_time = t.strftime('%I:%M%p')
-            times = '%5s - %5s' % (start_time, end_time)
-    days_times = ('%s %s' % (days, times)).strip()
+            times = '{:5s} - {:5s}'.format(start_time, end_time)
+    days_times = ('{} {}'.format(days, times)).strip()
     #if days_times:
-        #print days_times
+        #print(days_times)
     location = ''
     if 'meetings' in section.keys() and \
        'location' in section['meetings'][0].keys() and \
        'description' in section['meetings'][0]['location'].keys():
             location = section['meetings'][0]['location']['description']
-            #print location
+            #print(location)
     instructor = ''
     if 'meetings' in section.keys() and \
        'assignedInstructors' in section['meetings'][0].keys():
@@ -95,7 +95,7 @@ def get_section_info(section):
                    'names' in e['instructor'].keys() and \
                    'formattedName' in e['instructor']['names'][0].keys():
                         name = e['instructor']['names'][0]['formattedName']
-                        #print name
+                        #print(name)
                         names += [name]
             instructor = '\n'.join(trim_spaces(names))
     if 'enrollmentStatus' in section and 'status' in section['enrollmentStatus'] and 'description' in section['enrollmentStatus']['status']:
@@ -150,8 +150,8 @@ if __name__ == '__main__':
     # get matching sections
     sections = get_all_sections(dept, term_id, number_of_pages, page_size, exclude)
     if sections and len(sections) > 0:
-        print '{} class(es) found (see output in {})'.format(len(sections), output)
+        print('{} class(es) found (see output in {})'.format(len(sections), output))
         with open(output, 'w') as f:
             json.dump(sections, f, sort_keys = True, indent = 2)
     else:
-        print 'no classes found (no output)'
+        print('no classes found (no output)')

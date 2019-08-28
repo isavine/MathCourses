@@ -15,7 +15,7 @@ def parse_course_header(node):
     if len(l) == 2:
         dept, num = l
     else:
-        raise Exception, 'Expected department code and course number, got %s' % code
+        raise Exception('Expected department code and course number, got {}'.format(code))
     e = node.xpath('./button/h3/span[@class="title"]/text()')
     title = trim_spaces(e)[0]
     e = node.xpath('./button/h3/span[@class="hours"]/text()')
@@ -65,7 +65,7 @@ def parse_sections(node):
 def scrape_catalog(dept):
     # base URL for searching course catalog
     baseurl = 'http://guide.berkeley.edu/courses'
-    url = '%s/%s/' % (baseurl, dept.lower())
+    url = '{}/{}/'.format(baseurl, dept.lower())
     tree = html.parse(url)
     courses = []
     course_nodes = tree.xpath('//div[@class="courseblock"]')
@@ -95,9 +95,9 @@ if __name__ == '__main__':
                       help = 'name of output file in json format, default "catalog.json"')
     (options, args) = parser.parse_args()
     catalog = scrape_catalog(options.dept)
-    print '%d courses scraped' % len(catalog)
+    print('{:d} courses scraped'.format(len(catalog)))
     # output file
     f = open(options.outputfile, 'wb')
     dump(catalog, f, sort_keys = True, indent = 2)
     f.close()
-    print 'see output in "%s"' % options.outputfile
+    print('see output in "{}"'.format(options.outputfile))

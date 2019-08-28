@@ -2,12 +2,12 @@ from get_classes import get_classes
 
 def output_section_row(section):
     output = {}
-    output['Section'] = '%s %s' % (section['Number'], section['Type'])
+    output['Section'] = '{} {}'.format(section['Number'], section['Type'])
     output['Days/Times'] = section['Days/Times']
     output['Location']  = section['Location']
     # separate intructors with ', ' instead of '\n'
     output['Instructor'] = ', '.join(section['Instructor'].split('\n'))
-    #print output['Instructor']
+    #print(output['Instructor'])
     output['Class'] = section['Class']
     return output
 
@@ -20,7 +20,7 @@ def format_sections(sections):
     # header row
     html += '<tr>'
     for w, k in zip(width, keys):
-        html += '<th style="width: %s;">%s</th>' % (w, k)
+        html += '<th style="width: {};">{}</th>'.format(w, k)
     html += '</tr>'
     # data rows
     for section in sections:
@@ -28,12 +28,12 @@ def format_sections(sections):
         html += '<tr>'
         for k in keys:
             if output[k]:
-                html += '<td>%s</td>' % output[k]
+                html += '<td>{}</td>'.format(output[k])
             else:
                 html += '<td>&nbsp;</td>'
         html += '</tr>'
     html += '</table>'
-    #print html
+    #print(html)
     return html
 
 def format_schedule(c):
@@ -47,8 +47,8 @@ def format_schedule(c):
     html += '</tr>'
     # data row
     html += '<tr>'
-    html += '<td>%s</td>' % c['Course']['Units']
-    html += '<td>%s</td>' % c['Section']['Status']
+    html += '<td>{}</td>'.format(c['Course']['Units'])
+    html += '<td>{}</td>'.format(c['Section']['Status'])
     html += '</tr>'
     html += '</table>'
     # escape dollar sign to avoid collision with MathJax
@@ -60,16 +60,16 @@ def format_notes(course):
             'Recommended Reading', 'Grading', 'Homework', 'Course Webpage']
     for k in keys:
         if k in course and course[k]:
-            html += '<p class="course-data"><strong>%s:</strong>&nbsp;%s</p>' % (k, course[k])
+            html += '<p class="course-data"><strong>{}</strong>&nbsp;{}</p>'.format(k, course[k])
         else:
-            html += '<p class="course-data"><strong>%s:</strong>&nbsp;</p>' % k
+            html += '<p class="course-data"><strong>{}</strong>&nbsp;</p>'.format(k)
     # escape dollar sign to avoid collision with MathJax
     return html.replace('$', '\$')
 
 def output_class(c):
     o = {}
     o['Course Number'] = c['Course']['Number']
-    o['Section'] = '%s %s' % (c['Section']['Number'], c['Section']['Type'])
+    o['Section'] = '{} {}'.format(c['Section']['Number'], c['Section']['Type'])
     o['Sort Key'] = c['Section']['Sort Key']
     o['Course Title'] = c['Course']['Title']
     o['Days/Time'] = c['Section']['Days/Times']
@@ -114,5 +114,5 @@ if __name__ == '__main__':
             r = []
             for k in keys:
                 r += [o[k]]
-            #print r
+            #print(r)
             w.writerow(r)

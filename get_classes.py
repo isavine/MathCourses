@@ -73,9 +73,9 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     classes = get_classes(options.dept, options.term_id, options.number_of_pages, options.page_size, options.exclude)
     if classes and len(classes) > 0:
-        print '%d aggregated class(es) processed' % len(classes)
+        print('{:d} aggregated class(es) processed'.format(len(classes)))
         with open(options.outputfile, 'w') as f:
             dump(classes, f, sort_keys = True, indent = 2)
-        print 'see output in "%s"' % options.outputfile
+        print('see output in "{}"'.format(options.outputfile))
     else:
-        print 'no classes found (no output)'
+        print('no classes found (no output)')

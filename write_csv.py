@@ -42,13 +42,15 @@ def format_schedule(c):
     html += '<table class="course-data" style="width= 50%">'
     # header row
     html += '<tr>'
-    html += '<th style="width:20%;">Units</th>'
-    html += '<th style="width:80%;">Enrollment Status</th>'
+    html += '<th style="width:15%;">Units</th>'
+    html += '<th style="width:25%;">Enrollment Status</th>'
+    html += '<th style="width:60%;">Session</th>'
     html += '</tr>'
     # data row
     html += '<tr>'
     html += '<td>{}</td>'.format(c['Course']['Units'])
     html += '<td>{}</td>'.format(c['Section']['Status'])
+    html += '<td>{}</td>'.format(c['Section']['Session'])
     html += '</tr>'
     html += '</table>'
     # escape dollar sign to avoid collision with MathJax

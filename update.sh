@@ -1,5 +1,6 @@
 #!/bin/sh -x
 cd `dirname $0`
+. venv/bin/activate
 d=`date '+%d'`
 python get_schedule.py -t 2202 -o spring-sections-$d.json
 python write_csv.py -t 2202 -o spring-classes-$d.csv

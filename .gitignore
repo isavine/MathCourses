@@ -4,4 +4,4 @@
 *.json
 *.pyc
 *.swp
-venv
+venv*

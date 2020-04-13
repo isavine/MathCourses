@@ -1,4 +1,5 @@
 '''List sections from the output of get_schedule.py'''
+from __future__ import print_function
 import sys
 import json
 

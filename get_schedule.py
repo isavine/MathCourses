@@ -38,7 +38,7 @@ def get_all_sections(dept, term_id, number_of_pages, page_size, exclude):
     exclude_list = exclude.split(',')
     classes = []
     course_headers = ('Department', 'Number', 'Title')
-    section_headers = ('Class', 'Number', 'Type', 'Days/Times', 'Location', 'Instructor', 'Status', 'Session', 'Sort Key')
+    section_headers = ('Primary', 'Class', 'Number', 'Type', 'Days/Times', 'Location', 'Instructor', 'Status', 'Session', 'Sort Key')
     for s in sections:
         course_info = dict(zip(course_headers, get_course_info(s)))
         section_info = dict(zip(section_headers, get_section_info(s)))
@@ -59,6 +59,7 @@ def get_course_info(section):
 
 def get_section_info(section):
     '''Get section infomation from raw section format'''
+    primary = section['association']['primary']
     class_num = section['id']
     section_num = section['number']
     section_type = section['component']['code']
@@ -114,7 +115,7 @@ def get_section_info(section):
         session = '{} {}, {} - {}'.format(term, session_name, start_date, end_date)
     course_num = section['class']['course']['catalogNumber']['formatted']
     sort_key = get_sortkey(course_num, section_num, section_type)
-    return (class_num, section_num, section_type, days_times, location, instructor, status, session, sort_key)
+    return (primary, class_num, section_num, section_type, days_times, location, instructor, status, session, sort_key)
 
 def get_sortkey(course_num, section_num, section_type):
     '''Produce sort key from course number, section number, and section type'''

@@ -8,7 +8,7 @@ def aggregate(classes):
     dc = dict(zip(keys, classes))
     for k in sorted(keys):
         c = dc[k]
-        if c['Section']['Type'] != 'DIS' and c['Section']['Type'] != 'WBD': 
+        if c['Section']['Type'] != 'DIS' and c['Section']['Type'] != 'WBD':
            dc[k] = c
         else:
            pk = k[:-2].ljust(11,'0')

@@ -8,18 +8,19 @@ def aggregate(classes):
     dc = dict(zip(keys, classes))
     for k in sorted(keys):
         c = dc[k]
-        if c['Section']['Type'] != 'DIS' and c['Section']['Type'] != 'WBD':
+        if c['Section']['Type'] != 'DIS' and c['Section']['Type'] != 'WBD': 
            dc[k] = c
         else:
            pk = k[:-2].ljust(11,'0')
            if pk in dc:
               if not 'Discussions' in dc[pk]:
                   dc[pk]['Discussions'] = []
-              # the duscussion sort key is no longer needed
+              # the discussion sort key is no longer needed
               del c['Section']['Sort Key']
               dc[pk]['Discussions'] += [c['Section']]
               del dc[k]
-    classes = [dc[k] for k in sorted(dc.keys())]
+    # drop any non-primary classes
+    classes = [dc[k] for k in sorted(dc.keys()) if dc[k]['Section']['Primary']]
     return classes
 
 def add_catalog_info(classes, catalog):

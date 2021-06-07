@@ -40,6 +40,9 @@ def get_all_sections(dept, term_id, number_of_pages, page_size, exclude):
     course_headers = ('Department', 'Number', 'Title')
     section_headers = ('Primary', 'Class', 'Number', 'Type', 'Days/Times', 'Location', 'Instructor', 'Status', 'Session', 'Sort Key')
     for s in sections:
+        if not s['printInScheduleOfClasses']:
+            # drop non-printable sections
+            continue
         course_info = dict(zip(course_headers, get_course_info(s)))
         section_info = dict(zip(section_headers, get_section_info(s)))
         if section_info['Type'] in exclude_list:

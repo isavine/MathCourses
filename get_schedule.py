@@ -8,7 +8,7 @@ pp = pprint.PrettyPrinter(indent = 2)
 
 def trim_spaces(l):
         '''Trim white spaces in a list of text elements'''
-        return [u' '.join(e.split()).encode('utf-8') for e in l]
+        return [' '.join(e.split()) for e in l]
  
 def get_sections(dept, term_id, page_number, page_size, exclude):
     '''Get classes/sections from class API (one page at a time)'''
@@ -143,12 +143,12 @@ if __name__ == '__main__':
     parser = OptionParser(usage)
     parser.add_option('-d', '--dept', dest = 'dept', default = 'MATH',
                       help = 'department abbreviation, e.g. MATH')
-    parser.add_option('-t', '--term', dest = 'term_id', default = '2198',
-                      help = 'term id, e.g. 2198')
-    parser.add_option('-p', '--number-of-pages', type = 'int', dest = 'number_of_pages', default = 5,
-                      help = 'number of pages, e.g. 1')
+    parser.add_option('-t', '--term', dest = 'term_id', default = '2232',
+                      help = 'term id, e.g. 2232')
+    parser.add_option('-p', '--number-of-pages', type = 'int', dest = 'number_of_pages', default = 10,
+                      help = 'number of pages, e.g. 10 (default 10)')
     parser.add_option('-s', '--page-size', type = 'int', dest = 'page_size', default = 100,
-                      help = 'page number, e.g. 100 (maximum 400)')
+                      help = 'page number, e.g. 100 (default maximum 100)')
     parser.add_option('-e', '--exclude', dest = 'exclude', default = 'IND,COL',
                       help = 'comma separated section types to be excluded from search results, default "IND,COL"')
     parser.add_option('-o', '--output', dest = 'output', default = 'sections.json',

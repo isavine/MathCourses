@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     usage = 'usage: %prog options'
     parser = OptionParser(usage)
-    parser.add_option('-t', '--term', dest = 'term_id', default = '2198',
-                      help = 'term ID, e.g. 2198')
+    parser.add_option('-t', '--term', dest = 'term_id', default = '2232',
+                      help = 'term ID, e.g. 2232')
     parser.add_option('-s', '--section-id', dest = 'section_id', default = None,
                       help = 'class section ID')
     parser.add_option('-o', '--output', dest = 'output', default = 'section.json',

@@ -6,7 +6,7 @@ def html2text(l):
 
 def trim_spaces(l):
     '''Trim white spaces in a list of text elements'''
-    return [u' '.join(e.split()).encode('utf-8') for e in l]
+    return [' '.join(e.split()) for e in l]
 
 def parse_course_header(node):
     e = node.xpath('./button/h3/span[@class="code"]/text()')
@@ -63,10 +63,12 @@ def parse_sections(node):
     return d
 
 def scrape_catalog(dept):
+    import requests
     # base URL for searching course catalog
-    baseurl = 'http://guide.berkeley.edu/courses'
+    baseurl = 'https://guide.berkeley.edu/courses'
     url = '{}/{}/'.format(baseurl, dept.lower())
-    tree = html.parse(url)
+    page = requests.get(url).text
+    tree = html.document_fromstring(page)
     courses = []
     course_nodes = tree.xpath('//div[@class="courseblock"]')
     for node in course_nodes:
@@ -97,7 +99,7 @@ if __name__ == '__main__':
     catalog = scrape_catalog(options.dept)
     print('{:d} courses scraped'.format(len(catalog)))
     # output file
-    f = open(options.outputfile, 'wb')
-    dump(catalog, f, sort_keys = True, indent = 2)
-    f.close()
+    with open(options.outputfile, 'w') as f:
+        dump(catalog, f, sort_keys = True, indent = 2)
+        f.close()
     print('see output in "{}"'.format(options.outputfile))
